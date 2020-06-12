@@ -71,6 +71,45 @@ async function addCsvEntry (ctx) {
 }
 
 /**
+ * Returns the requested csv file.
+ * @param {Object} ctx
+ */
+async function getCsvTable (ctx) {
+  const tableName = ctx.params.table
+  if (!TABLES.map(e => e.name).includes(tableName)) {
+    ctx.throw(400, `Provided table: "${tableName}" does not exist.`)
+  }
+  const table = TABLES.find(e => e.name === tableName)
+  const filePath = path.join(DATA_DIR, `${table.name}.csv`)
+  const exists = await fileExists(filePath)
+  if (!exists) {
+    log.warn(`Tried to fetch data from ${tableName}, but the table is empty.`)
+    ctx.throw(404)
+  }
+  ctx.body = fs.createReadStream(filePath)
+  ctx.attachment(path.basename(filePath))
+}
+
+async function delCsvTable (ctx) {
+  const tableName = ctx.params.table
+  if (!TABLES.map(e => e.name).includes(tableName)) {
+    ctx.throw(400, `Provided table: "${tableName}" does not exist.`)
+  }
+  const table = TABLES.find(e => e.name === tableName)
+  const filePath = path.join(DATA_DIR, `${table.name}.csv`)
+  const exists = await fileExists(filePath)
+  if (exists) {
+    await fs.promises.unlink(filePath)
+    log.info(`Table ${tableName} deleted.`)
+  }
+  ctx.body = tableName
+}
+
+async function getAvailableTables (ctx) {
+  ctx.body = TABLES
+}
+
+/**
  * Converts something like:
  * [ 'abc','123 ] to "abc,123"
  * @param {Array.String} columns
@@ -116,10 +155,10 @@ function writeToFile (table, entries) {
     // assure that at every time only one write command is executed
     WRITE_QUEUE.add(() => {
       // assure that the csv file exists with the column names as first line
-      assureCsvFileExists(table)
+      return assureCsvFileExists(table)
         .then(() => {
           // append the csv data lines to the file
-          fs.appendFile(outPath, NEW_LINE + string, err => {
+          return fs.appendFile(outPath, NEW_LINE + string, err => {
             if (err) reject(err)
             else {
               log.info(`Written to ${outPath}:`)
@@ -134,3 +173,6 @@ function writeToFile (table, entries) {
 }
 
 module.exports.addCsvEntry = addCsvEntry
+module.exports.getCsvTable = getCsvTable
+module.exports.delCsvTable = delCsvTable
+module.exports.getAvailableTables = getAvailableTables

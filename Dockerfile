@@ -1,5 +1,8 @@
 FROM node:14.4-alpine3.12
 
+ENV PORT=3000
+EXPOSE ${PORT}
+
 # create folder for csv files
 RUN mkdir /data
 
