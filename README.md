@@ -29,3 +29,23 @@ _Server which converts post requests to csv entries._
     ```bash
     curl -O localhost:3000/table1
     ```
+
+## Example docker-compose.yml
+
+```yaml
+version: '3.7'
+services: 
+  pr2csv:
+    container_name: pr2csv
+    image: zingi/pr2csv:1.0.0
+    volumes: 
+      - pr2csv-data:/data
+    ports: 
+      - 3000:3000
+    environment: 
+      T_TABLE1: 'col1,col2,col3'
+      T_TABLE2: 'col1,col2,col3'
+
+volumes: 
+  pr2csv-data:
+```
