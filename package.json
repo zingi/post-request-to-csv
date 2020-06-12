@@ -12,7 +12,7 @@
     "url": "git+https://github.com/zingi/post-request-to-csv.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/zingi/post-request-to-csv/issues"
   },
